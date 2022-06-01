@@ -1,0 +1,81 @@
+const express = require('express')
+const router = express.Router()
+const { logger } = require('../helpers/logger.helpers')
+const stringHelpers = require('../helpers/string.helpers')
+const axios = require('axios')
+const k8s = require('@kubernetes/client-node')
+const fs = require('fs')
+const yaml = require('js-yaml')
+const { envConstants } = require('../constants')
+const uriHelpers = require('../helpers/uri.helpers')
+
+router.post('/', async (req, res, next) => {
+  try {
+    const kc = new k8s.KubeConfig()
+    kc.loadFromDefault()
+    const client = k8s.KubernetesObjectApi.makeApiClient(kc)
+    // const specString = await fs.readFileSync('./hello.yaml', 'utf8')
+    const specs = yaml.loadAll(yaml.dump(req.body))
+
+    // const specString = await fs.readFileSync('./hello.yaml', 'utf8')
+    // const specs = yaml.loadAll(specString)
+
+    const validSpecs = specs.filter((s) => s && s.kind && s.metadata)
+
+    let valid = 0
+
+    for (const spec of validSpecs) {
+      spec.metadata = spec.metadata || {}
+      spec.metadata.annotations = spec.metadata.annotations || {}
+      delete spec.metadata.annotations[
+        'kubectl.kubernetes.io/last-applied-configuration'
+      ]
+      spec.metadata.annotations[
+        'kubectl.kubernetes.io/last-applied-configuration'
+      ] = JSON.stringify(spec)
+      try {
+        const cur = await client.read(spec)
+        if (cur) {
+          await client
+            .patch(
+              spec,
+              {},
+              {},
+              {},
+              {},
+              {
+                headers: {
+                  'content-type': 'application/merge-patch+json'
+                }
+              }
+            )
+            .then(() => {
+              valid++
+            })
+            .catch((e) => {
+              logger.error(e.message)
+            })
+        } else {
+          await client
+            .create(spec)
+            .then(() => {
+              valid++
+            })
+            .catch((e) => {
+              logger.error(e.message)
+            })
+        }
+      } catch (e) {
+        logger.error(e.message)
+      }
+    }
+
+    res
+      .status(200)
+      .json({ message: `Created ${valid} resources of ${validSpecs.length}` })
+  } catch (error) {
+    next(error)
+  }
+})
+
+module.exports = router

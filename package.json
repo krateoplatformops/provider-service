@@ -1,0 +1,26 @@
+{
+  "name": "provider-service",
+  "version": "VERSION",
+  "description": "Krateo Provider Service",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.16.3",
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "helmet": "^5.0.2",
+    "js-yaml": "^4.1.0",
+    "moment": "^2.29.1",
+    "response-time": "^2.3.2",
+    "router": "^1.3.6",
+    "uuid": "^8.3.2",
+    "winston": "^3.6.0",
+    "yaml": "^2.0.1"
+  }
+}
