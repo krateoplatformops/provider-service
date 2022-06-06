@@ -32,10 +32,11 @@ router.get('/', async (req, res, next) => {
       items: []
     }
 
-    await Promise.all(
+    let yamlItems = []
+    yamlItems = await Promise.all(
       list.map(async (r) => {
         logger.debug(encodeURI(`${kc.getCurrentCluster().server}/${r.api}`))
-        const data = await new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
           request(
             encodeURI(`${kc.getCurrentCluster().server}/${r.api}`),
             opts,
@@ -48,66 +49,62 @@ router.get('/', async (req, res, next) => {
             }
           )
         })
+      })
+    )
 
-        try {
-          const payload = yaml.load(data)
-          if (payload.items && payload.items.length > 0) {
-            response.items = await Promise.all(
-              payload.items.map(async (x) => {
-                logger.debug(JSON.stringify(x))
-                const info = {
-                  kind: x.kind,
-                  icon: packageConstants.icon,
-                  name: x.metadata.name,
-                  version: x.spec.package.split(':')[1]
-                }
-
-                if (
-                  x.metadata.annotations &&
-                  x.metadata.annotations['metaUrl']
-                ) {
-                  const url = x.metadata.annotations['metaUrl']
-                  if (url) {
-                    const resp = await axios.get(url)
-                    const content = yaml.load(resp.data)
-                    info.description =
-                      content.metadata.annotations[
-                        'meta.crossplane.io/description'
-                      ]
-                    if (
-                      content.metadata.annotations['meta.crossplane.io/iconURI']
-                    ) {
-                      info.icon =
-                        content.metadata.annotations[
-                          'meta.crossplane.io/iconURI'
-                        ]
-                    }
-
-                    const annotations = [
-                      'meta.crossplane.io/maintainer',
-                      'meta.crossplane.io/license',
-                      'meta.crossplane.io/source'
-                    ]
-
-                    annotations.forEach((key) => {
-                      if (content.metadata.annotations[key]) {
-                        info[key.replace('meta.crossplane.io/', '')] =
-                          content.metadata.annotations[key]
-                      }
-                    })
-                  }
-                }
-                return info
-              })
-            )
-          }
-        } catch (err) {
-          logger.error(err)
+    let items = []
+    yamlItems.forEach((x) => {
+      try {
+        const payload = yaml.load(x)
+        if (payload.items && payload.items.length > 0) {
+          items = items.concat(payload.items)
         }
+      } catch (e) {
+        logger.error(e)
+      }
+    })
+
+    response.items = await Promise.all(
+      items.map(async (x) => {
+        logger.debug(JSON.stringify(x))
+        const info = {
+          kind: x.kind,
+          icon: packageConstants.icon,
+          name: x.metadata.name,
+          version: x.spec.package.split(':')[1]
+        }
+        if (x.metadata.annotations && x.metadata.annotations['metaUrl']) {
+          const url = x.metadata.annotations['metaUrl']
+          if (url) {
+            const resp = await axios.get(url)
+            const content = yaml.load(resp.data)
+            info.description =
+              content.metadata.annotations['meta.crossplane.io/description']
+            if (content.metadata.annotations['meta.crossplane.io/iconURI']) {
+              info.icon =
+                content.metadata.annotations['meta.crossplane.io/iconURI']
+            }
+
+            const annotations = [
+              'meta.crossplane.io/maintainer',
+              'meta.crossplane.io/license',
+              'meta.crossplane.io/source'
+            ]
+
+            annotations.forEach((key) => {
+              if (content.metadata.annotations[key]) {
+                info[key.replace('meta.crossplane.io/', '')] =
+                  content.metadata.annotations[key]
+              }
+            })
+          }
+        }
+        return info
       })
     )
 
     logger.debug(JSON.stringify(response))
+    logger.info(`Found ${response.items.length} items`)
 
     res.status(200).json(response)
   } catch (error) {
