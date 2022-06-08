@@ -73,6 +73,13 @@ router.get('/', async (req, res, next) => {
           name: x.metadata.name,
           version: x.spec.package.split(':')[1]
         }
+        if (x.status.conditions) {
+          const healthy = x.status.conditions.find((x) => x.type === 'Healthy')
+          if (healthy) {
+            info.healthy = healthy.status
+          }
+        }
+
         if (x.metadata.annotations && x.metadata.annotations['metaUrl']) {
           const url = x.metadata.annotations['metaUrl']
           if (url) {
