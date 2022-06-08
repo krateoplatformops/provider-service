@@ -14,11 +14,7 @@ router.post('/', async (req, res, next) => {
     const kc = new k8s.KubeConfig()
     kc.loadFromDefault()
     const client = k8s.KubernetesObjectApi.makeApiClient(kc)
-    // const specString = await fs.readFileSync('./hello.yaml', 'utf8')
     const specs = yaml.loadAll(yaml.dump(req.body))
-
-    // const specString = await fs.readFileSync('./hello.yaml', 'utf8')
-    // const specs = yaml.loadAll(specString)
 
     const validSpecs = specs.filter((s) => s && s.kind && s.metadata)
 
@@ -34,37 +30,40 @@ router.post('/', async (req, res, next) => {
         'kubectl.kubernetes.io/last-applied-configuration'
       ] = JSON.stringify(spec)
       try {
-        const cur = await client.read(spec)
-        if (cur) {
-          await client
-            .patch(
-              spec,
-              {},
-              {},
-              {},
-              {},
-              {
-                headers: {
-                  'content-type': 'application/merge-patch+json'
+        await client
+          .read(spec)
+          .then(async () => {
+            await client
+              .patch(
+                spec,
+                {},
+                {},
+                {},
+                {},
+                {
+                  headers: {
+                    'content-type': 'application/merge-patch+json'
+                  }
                 }
-              }
-            )
-            .then(() => {
-              valid++
-            })
-            .catch((e) => {
-              logger.error(e.message)
-            })
-        } else {
-          await client
-            .create(spec)
-            .then(() => {
-              valid++
-            })
-            .catch((e) => {
-              logger.error(e.message)
-            })
-        }
+              )
+              .then(() => {
+                valid++
+              })
+              .catch((e) => {
+                logger.error(e.message)
+              })
+          })
+          .catch(async () => {
+            await client
+              .create(spec)
+              .then(() => {
+                valid++
+              })
+              .catch((e) => {
+                // console.log(e)
+                logger.error(e.message)
+              })
+          })
       } catch (e) {
         logger.error(e.message)
       }
