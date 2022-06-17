@@ -20,21 +20,13 @@ router.get('/', async (req, res, next) => {
     // PROVIDERS        /apis/pkg.crossplane.io/v1/providers
     // CONFIGURATIONS   /apis/pkg.crossplane.io/v1/configurations
 
-    const list = [
-      { key: 'packages', api: 'apis/pkg.crossplane.io/v1/providers' },
-      {
-        key: 'configurations',
-        api: 'apis/pkg.crossplane.io/v1/configurations'
-      }
-    ]
-
     const response = {
       items: []
     }
 
     let yamlItems = []
     yamlItems = await Promise.all(
-      list.map(async (r) => {
+      packageConstants.list.map(async (r) => {
         logger.debug(encodeURI(`${kc.getCurrentCluster().server}/${r.api}`))
         return await new Promise((resolve, reject) => {
           request(

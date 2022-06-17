@@ -1,13 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const { logger } = require('../helpers/logger.helpers')
-const stringHelpers = require('../helpers/string.helpers')
-const axios = require('axios')
 const k8s = require('@kubernetes/client-node')
-const fs = require('fs')
 const yaml = require('js-yaml')
-const { envConstants } = require('../constants')
-const uriHelpers = require('../helpers/uri.helpers')
 
 router.post('/', async (req, res, next) => {
   try {
