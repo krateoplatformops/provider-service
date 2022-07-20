@@ -4,10 +4,7 @@ const { logger } = require('../helpers/logger.helpers')
 const k8s = require('@kubernetes/client-node')
 const request = require('request')
 const yaml = require('js-yaml')
-const stringHelpers = require('../helpers/string.helpers')
-const fs = require('fs')
 const { packageConstants } = require('../constants')
-const axios = require('axios')
 
 router.get('/', async (req, res, next) => {
   try {
@@ -77,32 +74,6 @@ router.get('/', async (req, res, next) => {
           }
         } catch {}
 
-        if (x.metadata.annotations && x.metadata.annotations['metaUrl']) {
-          const url = x.metadata.annotations['metaUrl']
-          if (url) {
-            const resp = await axios.get(url)
-            const content = yaml.load(resp.data)
-            info.description =
-              content.metadata.annotations['meta.crossplane.io/description']
-            if (content.metadata.annotations['meta.crossplane.io/iconURI']) {
-              info.icon =
-                content.metadata.annotations['meta.crossplane.io/iconURI']
-            }
-
-            const annotations = [
-              'meta.crossplane.io/maintainer',
-              'meta.crossplane.io/license',
-              'meta.crossplane.io/source'
-            ]
-
-            annotations.forEach((key) => {
-              if (content.metadata.annotations[key]) {
-                info[key.replace('meta.crossplane.io/', '')] =
-                  content.metadata.annotations[key]
-              }
-            })
-          }
-        }
         return info
       })
     )
