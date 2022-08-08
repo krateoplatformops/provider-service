@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
     // CONFIGURATIONS   /apis/pkg.crossplane.io/v1/configurations
 
     const response = {
-      items: []
+      list: []
     }
 
     let yamlItems = []
