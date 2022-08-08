@@ -53,7 +53,7 @@ router.get('/', async (req, res, next) => {
       }
     })
 
-    response.items = await Promise.all(
+    response.list = await Promise.all(
       items.map(async (x) => {
         logger.debug(JSON.stringify(x))
         const info = {
@@ -79,7 +79,7 @@ router.get('/', async (req, res, next) => {
     )
 
     logger.debug(JSON.stringify(response))
-    logger.info(`Found ${response.items.length} items`)
+    logger.info(`Found ${response.list.length} items`)
 
     res.status(200).json(response)
   } catch (error) {
