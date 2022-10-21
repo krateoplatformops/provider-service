@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { logger } = require('../helpers/logger.helpers')
+const logger = require('../service-library/helpers/logger.helpers')
 const k8s = require('@kubernetes/client-node')
 const request = require('request')
 const yaml = require('js-yaml')
@@ -52,7 +52,6 @@ router.delete('/', async (req, res, next) => {
         .delete(pkg)
         .then(() => {
           res.status(200).send()
-          return
         })
         .catch((e) => {
           logger.error(e.message)

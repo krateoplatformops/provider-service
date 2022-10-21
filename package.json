@@ -4,7 +4,12 @@
   "description": "Krateo Provider Service",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:git": "prettier --write . && git add -A .",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +19,6 @@
     "axios": "^0.26.1",
     "cors": "^2.8.5",
     "express": "^4.17.3",
-    "helmet": "^5.0.2",
     "js-yaml": "^4.1.0",
     "moment": "^2.29.1",
     "response-time": "^2.3.2",
@@ -22,5 +26,15 @@
     "uuid": "^8.3.2",
     "winston": "^3.6.0",
     "yaml": "^2.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-promise": "^6.0.1",
+    "husky": "^8.0.1",
+    "prettier": "^2.7.1"
   }
 }

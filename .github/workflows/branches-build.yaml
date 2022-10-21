@@ -2,10 +2,10 @@ name: Build Docker image for every commit
 
 on:
   push:
-    branches: "**"
+    branches: '**'
 
 env:
-  IMAGE_TAG: "latest"
+  IMAGE_TAG: 'latest'
 
 jobs:
   push:
@@ -38,9 +38,9 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: "ghcr.io/krateoplatformops/${{ github.event.repository.name }}:${{ env.IMAGE_TAG}}"
+          tags: 'ghcr.io/krateoplatformops/${{ github.event.repository.name }}:${{ env.IMAGE_TAG}}'
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-          build-args: "VERSION=0.0.0-${{ steps.slug.outputs.sha8 }}"
+          build-args: 'VERSION=0.0.0-${{ steps.slug.outputs.sha8 }}'
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

@@ -1,4 +1,4 @@
-const { envConstants } = require('./constants')
+const { envConstants } = require('./service-library/constants')
 
 const app = require('./app')
 
