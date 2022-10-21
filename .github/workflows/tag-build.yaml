@@ -10,6 +10,10 @@ jobs:
     name: Create docker image
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Submodule
+        run: git submodule update --recursive --remote --merge --force
       - name: Get tag
         id: tag
         uses: dawidd6/action-get-tag@v1
@@ -50,6 +54,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Submodule
+        run: git submodule update --recursive --remote --merge --force
       - name: Set tag
         run: echo "::set-output name=VERSION_TAG::$(git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2' )"
         id: tagger
@@ -67,8 +73,8 @@ jobs:
       - name: Webhook
         uses: indiesdev/curl@v1.1
         with:
-          timeout: 5000
           url: ${{ secrets.WEBHOOK_URL }}
           method: 'POST'
+          timeout: 5000
           headers: '{ "x-token": "${{ secrets.WEBHOOK_TOKEN }}" }'
           body: '{ "project": "${{ github.event.repository.name }}", "tag": "${{ steps.tagger.outputs.VERSION_TAG }}" }'
