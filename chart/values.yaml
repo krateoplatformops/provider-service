@@ -3,6 +3,9 @@
 
 replicaCount: 1
 
+labels:
+  component: service
+
 image:
   repository: ghcr.io/krateoplatformops/provider-service
   pullPolicy: IfNotPresent

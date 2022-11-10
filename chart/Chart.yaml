@@ -9,7 +9,7 @@ appVersion: VERSION
 
 dependencies:
   - name: helm-chart-library
-    version: 0.1.3
+    version: 0.1.7
     repository: http://charts.krateo.io
 
 maintainers:
